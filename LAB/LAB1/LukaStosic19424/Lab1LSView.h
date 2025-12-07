@@ -20,7 +20,7 @@ public:
 
 // Overrides
 public:
-	void DrawRotatedPolygon(CDC* pDC, int cx, int cy, int radius, int numSides, double angleDegrees, COLORREF borderColor, int borderWidth);
+	void DrawRegularPolygon(CDC* pDC, int cx, int cy, int r, int n, float rotAngle);
 	void DrawSquare(CDC* pDC, int x, int y, int size, COLORREF borderColor, int borderWidth, COLORREF fillColor);
 	void DrawRectangle(CDC* pDC, int x1, int y1, int x2, int y2, COLORREF borderColor, int borderWidth, COLORREF fillColor);
 	void DrawTriangle(CDC* pDC, int x1, int y1, int x2, int y2, int x3, int y3, COLORREF borderColor, int borderWidth, COLORREF fillColor);
