@@ -53,31 +53,33 @@ BOOL CLab1LSView::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs);
 }
 
-void CLab1LSView::DrawRotatedPolygon(CDC* pDC, int cx, int cy, int radius, int numSides, double angleDegrees, COLORREF borderColor, int borderWidth) {
-	POINT* pts = new POINT[numSides];
+void CLab1LSView::DrawRegularPolygon(CDC* pDC, int cx, int cy, int r, int n, float rotAngle) {
+	CPoint* pts = new CPoint[n];
 
-	double angleRad = angleDegrees * M_PI / 180.0;
+	for (int i = 0; i < n; i++) {
+		float centralAngle = 2.0f * M_PI * i;
+		float angle = (centralAngle / n) + rotAngle;
 
-	for (int i = 0; i < numSides; i++) {
-		double angle = 2.0 * M_PI * i / numSides - M_PI / 2 + angleRad;
-		pts[i].x = cx + (int)(radius * cos(angle));
-		pts[i].y = cy + (int)(radius * sin(angle));
+		int x = cx + static_cast<int>(r * cos(angle));
+		int y = cy + static_cast<int>(r * sin(angle));
+
+		pts[i] = CPoint(x, y);
 	}
 
 	LOGBRUSH lb;
 	lb.lbStyle = BS_SOLID;
-	lb.lbColor = borderColor;
+	lb.lbColor = RGB(0, 0, 255);
 
-	CPen* pen = new CPen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, borderWidth, &lb);
-	CPen* pOldPen = pDC->SelectObject(pen);
+	CPen pen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, 4, &lb);
+	CPen* oldPen = pDC->SelectObject(&pen);
 
-	CBrush* pOldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
-	pDC->Polygon(pts, numSides);
+	CBrush* oldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
 
-	pDC->SelectObject(pOldPen);
-	pDC->SelectObject(pOldBrush);
+	pDC->Polygon(pts, n);
 
-	delete pen;
+	pDC->SelectObject(&oldPen);
+	pDC->SelectObject(&oldBrush);
+
 	delete[] pts;
 }
 
@@ -122,31 +124,11 @@ void CLab1LSView::DrawRectangle(CDC* pDC, int x1, int y1, int x2, int y2, COLORR
 	delete pen;
 }
 
-void CLab1LSView::DrawSquare(CDC* pDC, int x, int y, int size, COLORREF borderColor, int borderWidth, COLORREF fillColor) {
-	LOGBRUSH logBrush;
-	logBrush.lbStyle = BS_SOLID;
-	logBrush.lbColor = RGB(0, 255, 255);
-	CPen* pen = new CPen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, borderWidth, &logBrush);
-	CPen* pOldPen = pDC->SelectObject(pen);
-
-	CBrush brush(HS_CROSS, RGB(200, 220, 255));
-	CBrush* pOldBrush = pDC->SelectObject(&brush);
-
-	pDC->Rectangle(x, y, x + size, y + size);
-
-	pDC->SelectObject(pOldPen);
-	pDC->SelectObject(pOldBrush);
-
-	delete pen;
-}
-
 void CLab1LSView::FillBackground(CDC* pDC, COLORREF backColor) {
-	CRect rcClient;
-	GetClientRect(&rcClient);
 
 	CBrush brush(backColor);
 	CBrush* pOldBrush = pDC->SelectObject(&brush);
-	pDC->Rectangle(rcClient);
+	pDC->Rectangle(0,0,500,500);
 
 	pDC->SelectObject(pOldBrush);
 }
@@ -179,27 +161,50 @@ void CLab1LSView::OnDraw(CDC* pDC)
 		return;
 
 	FillBackground(pDC, RGB(180, 180, 180));
+	DrawGrid(pDC, 25, RGB(240, 240, 240));
+
+	// square 1
+
+	DrawRectangle(pDC, 25, 25, 10 * 25, 10 * 25, RGB(0, 255, 255), 5, RGB(255, 255, 255));
+
+	DrawTriangle(pDC, 25, 25, 140, 25, 140, 140, RGB(0, 255, 255), 5, RGB(128, 0, 128));
+	DrawTriangle(pDC, 25, 25, 25, 250, 140, 140, RGB(0, 255, 255), 5, RGB(0, 255, 0));
+	DrawTriangle(pDC, 140, 250, 250, 250, 250, 140, RGB(0, 255, 255), 5, RGB(255, 165, 0));
+
+	DrawRectangle(pDC, 140, 25, 250, 140, RGB(0, 255, 255), 5, RGB(255, 0, 0));
+
+	// one polygon
+	CPoint pts[4] = { CPoint(25, 250), CPoint(140, 140), CPoint(250, 140), CPoint(140, 250) };
+
+	LOGBRUSH lb;
+	lb.lbStyle = BS_SOLID;
+	lb.lbColor = RGB(0, 255, 255);
+
+	CPen pen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_ROUND, 5, &lb);
+	CPen* oldPen = pDC->SelectObject(&pen);
+
+	CBrush brush(HS_CROSS, RGB(0, 0, 255));
+	CBrush* oldBrush = pDC->SelectObject(&brush);
+
+	pDC->Polygon(pts, 4);
+
+	pDC->SelectObject(&oldPen);
+	pDC->SelectObject(&oldBrush);
+
+	// square 2
+
+	DrawRectangle(pDC, 250, 250, 475, 475, RGB(0, 255, 255), 5, RGB(255, 255, 255));
+
+	DrawTriangle(pDC, 250, 250, 475, 475, 475, 250, RGB(0,255,255), 5, RGB(255, 255, 0));
+	DrawTriangle(pDC, 250, 250, 475, 475, 250, 475, RGB(0, 255, 255), 5, RGB(255, 192, 203));
 
 
-	DrawSquare(pDC, 20, 20, 240, RGB(0, 255, 255), 3, RGB(0, 255, 255));
-	DrawTriangle(pDC, 20, 20, 140, 140, 20, 260, RGB(0, 255, 255), 3, RGB(0, 200, 0));
-	DrawTriangle(pDC, 20, 20, 140, 140, 140, 20, RGB(0, 255, 255), 3, RGB(150, 0, 150));
-	DrawRectangle(pDC, 140, 20, 260, 140, RGB(0, 255, 255), 3, RGB(255, 0, 0));
-	DrawTriangle(pDC, 260, 140, 260, 260, 140, 260, RGB(0, 255, 255), 3, RGB(255, 165, 0));
-
-
-	DrawSquare(pDC, 260, 260, 220, RGB(0, 255, 255), 3, RGB(0, 255, 255));
-	DrawTriangle(pDC, 260, 260, 480, 480, 480, 260, RGB(0, 255, 255), 3, RGB(255, 255, 0));
-	DrawTriangle(pDC, 260, 260, 480, 480, 260, 480, RGB(0, 255, 255), 3, RGB(255, 105, 180));
-
-	DrawRotatedPolygon(pDC, 75, 140, 30, 6, 60, RGB(0, 255, 255), 3);
-	DrawRotatedPolygon(pDC, 105, 60, 20, 4, 90, RGB(0, 255, 255), 3);
-	DrawRotatedPolygon(pDC, 225, 220, 20, 6, 30, RGB(0, 255, 255), 3);
-	DrawRotatedPolygon(pDC, 420, 320, 35, 6, 60, RGB(0, 255, 255), 3);
-	DrawRotatedPolygon(pDC, 320, 420, 35, 5, 90, RGB(0, 255, 255), 3);
-
-	DrawGrid(pDC, 20, RGB(240, 240, 240));
-
+	// polygons
+	DrawRegularPolygon(pDC, 73, 140, 25, 6, 79);
+	DrawRegularPolygon(pDC, 110, 55, 20, 4, 0);
+	DrawRegularPolygon(pDC, 215, 215, 17, 6, 0);
+	DrawRegularPolygon(pDC, 400, 315, 35, 8, 0);
+	DrawRegularPolygon(pDC, 315, 410, 35, 5, 0);
 }
 
 
