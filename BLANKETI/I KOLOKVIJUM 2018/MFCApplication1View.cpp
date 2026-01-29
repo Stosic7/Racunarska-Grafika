@@ -101,7 +101,6 @@ void CMFCApplication1View::DrawFork(CDC* pDC)
 	Rotate(pDC, -89, false);
 	Translate(pDC, 45, 113, false);
 
-	pDC->SetWorldTransform(&oldForm);
 }
 
 void CMFCApplication1View::DrawArm2(CDC* pDC)
@@ -118,7 +117,6 @@ void CMFCApplication1View::DrawArm2(CDC* pDC)
 	Rotate(pDC, -180, false);
 	Translate(pDC, -99, 270, false);
 
-	pDC->SetWorldTransform(&oldForm);
 }
 
 void CMFCApplication1View::DrawArm1(CDC* pDC)
@@ -132,9 +130,6 @@ void CMFCApplication1View::DrawArm1(CDC* pDC)
 	Translate(pDC, -58, -61, false);
 	DrawImgTransparent(pDC, arm1);
 	Rotate(pDC, 90, false);
-	Translate(pDC, -185, -525, false); // vracam staru transformaciju iz DrawBody jer je po uslovu zadatka trebala da bude postavljena?
-
-	pDC->SetWorldTransform(&oldForm);
 }
 
 void CMFCApplication1View::DrawBody(CDC* pDC)
@@ -143,7 +138,7 @@ void CMFCApplication1View::DrawBody(CDC* pDC)
 	Translate(pDC, img->Width() / 2, img->Height(), false);
 	DrawImgTransparent(pDC, img);
 	Translate(pDC, -(img->Width() / 2), -(img->Height()), false);
-	Translate(pDC, 185, 525, false); // pozicija za arm1
+	Translate(pDC, 185, 525, false);
 }
 
 void CMFCApplication1View::Scale(CDC* pDC, float sX, float sY, bool rightMultiply)
@@ -200,15 +195,16 @@ void CMFCApplication1View::DrawImgTransparent(CDC* pDC, DImage* pImage)
 
 void CMFCApplication1View::DrawBackground(CDC* pDC)
 {
-	int w = pozadina->Width();
-	int h = pozadina->Height();
-	CRect srcRect(0, 0, w, h);
-
 	CRect clientRect;
 	GetClientRect(&clientRect);
-	CRect dstRect(0, 0, clientRect.Width(), clientRect.Height());
 
-	pozadina->Draw(pDC, srcRect, dstRect);
+	int w = pozadina->Width();
+	int h = pozadina->Height();
+
+	CRect imgRect(0, 0, w, h);
+	CRect imgDest(0, 0, clientRect.Width(), clientRect.Height());
+
+	pozadina->Draw(pDC, imgRect, imgDest);
 }
 
 void CMFCApplication1View::OnDraw(CDC* pDC)
@@ -220,17 +216,16 @@ void CMFCApplication1View::OnDraw(CDC* pDC)
 
 	CRect clientRect;
 	GetClientRect(&clientRect);
-
 	CDC* pMemDC = new CDC();
 	pMemDC->CreateCompatibleDC(pDC);
-
 	CBitmap bmp;
 	bmp.CreateCompatibleBitmap(pDC, clientRect.Width(), clientRect.Height());
 	pMemDC->SelectObject(&bmp);
-
 	int prevMode = pMemDC->SetGraphicsMode(GM_ADVANCED);
+
 	XFORM oldForm;
 	pMemDC->GetWorldTransform(&oldForm);
+	pMemDC->FillSolidRect(clientRect, pDC->GetBkColor());
 	//start
 	
 	DrawBackground(pMemDC);
