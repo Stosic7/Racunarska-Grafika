@@ -106,8 +106,8 @@ void CIKOLOKVIJUM2022View::DrawLamp(CDC* pDC, bool bIsShadow)
 	Translate(pDC, clientRect.Width() / 2 + 125, clientRect.Height() / 2 + 275, false);
 	DrawLampBase(pDC, bIsShadow);
 	DrawLampArm1(pDC, bIsShadow);
-	DrawLampHead(pDC, bIsShadow);
 	DrawLampArm2(pDC, bIsShadow);
+	DrawLampHead(pDC, bIsShadow);
 	Translate(pDC, -(clientRect.Width() / 2 + 125), -(clientRect.Height() / 2 + 275), false);
 
 	pDC->SetWorldTransform(&oldForm);
@@ -128,7 +128,6 @@ void CIKOLOKVIJUM2022View::DrawLampHead(CDC* pDC, bool bIsShadow)
 	Rotate(pDC, -45, false);
 	Translate(pDC, 9, 678, false);
 
-	pDC->SetWorldTransform(&oldForm);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampArm2(CDC* pDC, bool bIsShadow)
@@ -146,7 +145,7 @@ void CIKOLOKVIJUM2022View::DrawLampArm2(CDC* pDC, bool bIsShadow)
 	Rotate(pDC, 130, false);
 	Translate(pDC, -195, 245, false);
 
-	pDC->SetWorldTransform(&oldForm);
+
 }
 
 void CIKOLOKVIJUM2022View::DrawLampArm1(CDC* pDC, bool bIsShadow)
@@ -164,7 +163,6 @@ void CIKOLOKVIJUM2022View::DrawLampArm1(CDC* pDC, bool bIsShadow)
 	Rotate(pDC, 45, false);
 	Translate(pDC, 60, 120, false);
 
-	pDC->SetWorldTransform(&oldForm);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampBase(CDC* pDC, bool bIsShadow)
