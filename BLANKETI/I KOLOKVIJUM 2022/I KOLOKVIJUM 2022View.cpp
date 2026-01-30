@@ -1,4 +1,5 @@
-// I KOLOKVIJUM 2022View.cpp : implementation of the CIKOLOKVIJUM2022View class
+
+// IKOLOKVIJUM2022View.cpp : implementation of the CIKOLOKVIJUM2022View class
 //
 
 #include "pch.h"
@@ -6,18 +7,14 @@
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "I KOLOKVIJUM 2022.h"
+#include "IKOLOKVIJUM2022.h"
 #endif
 
-#include "I KOLOKVIJUM 2022Doc.h"
-#include "I KOLOKVIJUM 2022View.h"
+#include "IKOLOKVIJUM2022Doc.h"
+#include "IKOLOKVIJUM2022View.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
-#endif
-
-#ifndef RAD
-#define RAD(x) ((x) * 3.14159265358979323846f / 180.0f)
 #endif
 
 
@@ -40,7 +37,6 @@ END_MESSAGE_MAP()
 
 CIKOLOKVIJUM2022View::CIKOLOKVIJUM2022View() noexcept
 {
-	// TODO: add construction code here
 	base = new DImage();
 	arm1 = new DImage();
 	arm2 = new DImage();
@@ -60,12 +56,19 @@ CIKOLOKVIJUM2022View::CIKOLOKVIJUM2022View() noexcept
 	arm1_shadow->Load(CString("slike/arm1_shadow.png"));
 	arm2_shadow->Load(CString("slike/arm2_shadow.png"));
 	head_shadow->Load(CString("slike/head_shadow.png"));
-
 }
 
 CIKOLOKVIJUM2022View::~CIKOLOKVIJUM2022View()
 {
-	delete base, arm1, arm2, head, pozadina, base_shadow, arm1_shadow, arm2_shadow, head_shadow;
+	delete base;
+	delete arm1;
+	delete arm2;
+	delete head;
+	delete pozadina;
+	delete base_shadow;
+	delete arm1_shadow;
+	delete arm2_shadow;
+	delete head_shadow;
 }
 
 BOOL CIKOLOKVIJUM2022View::PreCreateWindow(CREATESTRUCT& cs)
@@ -78,171 +81,141 @@ BOOL CIKOLOKVIJUM2022View::PreCreateWindow(CREATESTRUCT& cs)
 
 // CIKOLOKVIJUM2022View drawing
 
+
+
 void CIKOLOKVIJUM2022View::DrawLampShadow(CDC* pDC)
 {
-	CRect clientRect;
-	GetClientRect(&clientRect);
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
 
-	Translate(pDC, clientRect.Width() / 2 + 127, clientRect.Height() / 2 + 225, false);
-
+	Translate(pDC, 300, 1000, false);
 	Scale(pDC, 1, 0.25, false);
 	Rotate(pDC, -90, false);
-
-	Translate(pDC, -(clientRect.Width() / 2 + 127), -(clientRect.Height() / 2 + 225), false);
 	DrawLamp(pDC, true);
 
-	pDC->SetWorldTransform(&oldForm);
+	pDC->SetWorldTransform(&xf);
+
 }
 
 void CIKOLOKVIJUM2022View::DrawLamp(CDC* pDC, bool bIsShadow)
 {
-	CRect clientRect;
-	GetClientRect(&clientRect);
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
 
-	Translate(pDC, clientRect.Width() / 2 + 125, clientRect.Height() / 2 + 275, false);
 	DrawLampBase(pDC, bIsShadow);
 	DrawLampArm1(pDC, bIsShadow);
 	DrawLampArm2(pDC, bIsShadow);
 	DrawLampHead(pDC, bIsShadow);
-	Translate(pDC, -(clientRect.Width() / 2 + 125), -(clientRect.Height() / 2 + 275), false);
 
-	pDC->SetWorldTransform(&oldForm);
+	pDC->SetWorldTransform(&xf);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampHead(CDC* pDC, bool bIsShadow)
 {
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
-
 	DImage* img = bIsShadow ? head_shadow : head;
-	Translate(pDC, -9, -678, false);
-	Rotate(pDC, 45, false);
+
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
+
+	Rotate(pDC, 90, false);
+	Translate(pDC, -450, -140, false);
 	Translate(pDC, 178, 100, false);
 	Rotate(pDC, headAngle, false);
 	Translate(pDC, -178, -100, false);
-	DrawImgTransparent(pDC, img);
-	Rotate(pDC, -45, false);
-	Translate(pDC, 9, 678, false);
 
+	DrawImgTransparent(pDC, img);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampArm2(CDC* pDC, bool bIsShadow)
 {
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
-
 	DImage* img = bIsShadow ? arm2_shadow : arm2;
-	Translate(pDC, 195, -245, false);
-	Rotate(pDC, -130, false);
+
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
+
+	Rotate(pDC, -90, false);
 	Translate(pDC, 36, 40, false);
 	Rotate(pDC, arm2Angle, false);
 	Translate(pDC, -36, -40, false);
 	DrawImgTransparent(pDC, img);
-	Rotate(pDC, 130, false);
-	Translate(pDC, -195, 245, false);
-
-
+	Rotate(pDC, 90, false);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampArm1(CDC* pDC, bool bIsShadow)
 {
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
-
 	DImage* img = bIsShadow ? arm1_shadow : arm1;
-	Translate(pDC, -60, -120, false);
+
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
+
 	Rotate(pDC, -45, false);
 	Translate(pDC, 58, 61, false);
 	Rotate(pDC, arm1Angle, false);
 	Translate(pDC, -58, -61, false);
 	DrawImgTransparent(pDC, img);
-	Rotate(pDC, 45, false);
-	Translate(pDC, 60, 120, false);
+	Translate(pDC, 270, 100, false);
+}
 
+void CIKOLOKVIJUM2022View::Scale(CDC* pDC, float sX, float sY, bool rightMultiply)
+{
+	XFORM xf = { sX, 0, 0, sY, 0, 0 };
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+void CIKOLOKVIJUM2022View::Rotate(CDC* pDC, float angle, bool rightMultiply)
+{
+	float rad = angle * (3.14 / 180.0f);
+	XFORM xf = { cos(rad), sin(rad), -sin(rad), cos(rad), 0, 0};
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+void CIKOLOKVIJUM2022View::Translate(CDC* pDC, float dX, float dY, bool rightMultiply)
+{
+	XFORM xf = { 1, 0, 0, 1, dX, dY };
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 
 void CIKOLOKVIJUM2022View::DrawLampBase(CDC* pDC, bool bIsShadow)
 {
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
-
+	CRect cr;
+	GetClientRect(&cr);
 	DImage* img = bIsShadow ? base_shadow : base;
-	Translate(pDC, -img->Width() / 2, -img->Height(), false);
-	DrawImgTransparent(pDC, img);
-	Translate(pDC, img->Width() / 2, img->Height(), false);
 
-	pDC->SetWorldTransform(&oldForm);
+	XFORM xf;
+	pDC->GetWorldTransform(&xf);
+
+	Translate(pDC, ((cr.Width() / 2)), ((cr.Height() / 2) + 210), false); // pretpostavka da se app otvara u full window, kao na blanketu
+	DrawImgTransparent(pDC, img);
+	Translate(pDC, 90, 10, false);
+
 }
 
 void CIKOLOKVIJUM2022View::DrawImgTransparent(CDC* pDC, DImage* pImage)
 {
 	BYTE* bytes = pImage->GetDIBBits();
-	COLORREF transparent = RGB(bytes[2], bytes[1], bytes[0]);
+	COLORREF color = RGB(bytes[2], bytes[1], bytes[0]);
 
 	int w = pImage->Width();
 	int h = pImage->Height();
 	CRect rect(0, 0, w, h);
 
-	pImage->DrawTransparent(pDC, rect, rect, transparent);
+	pImage->DrawTransparent(pDC, rect, rect, color);
 }
 
 void CIKOLOKVIJUM2022View::DrawBackground(CDC* pDC)
 {
-	CRect clientRect;
-	GetClientRect(&clientRect);
+	CRect cr;
+	GetClientRect(&cr);
 
 	int w = pozadina->Width();
 	int h = pozadina->Height();
 
-	CRect imgRect(0, 0, w, h);
-	CRect imgDest(0, 0, clientRect.Width(), clientRect.Height());
+	int x = (cr.Width() - w) / 2;
+	int y = cr.Height() - h;
 
-	pozadina->Draw(pDC, imgRect, imgDest);
-}
-
-void CIKOLOKVIJUM2022View::Scale(CDC* pDC, float dX, float dY, bool rightMultiply)
-{
-	XFORM trans;
-	trans.eM11 = dX;
-	trans.eM12 = 0.0;
-	trans.eM21 = 0.0;
-	trans.eM22 = dY;
-	trans.eDx = 0.0;
-	trans.eDy = 0.0;
-
-	pDC->ModifyWorldTransform(&trans, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
-}
-
-void CIKOLOKVIJUM2022View::Rotate(CDC* pDC, float angle, bool rightMultiply)
-{
-	float angle_rad = RAD(angle);
-
-	XFORM trans;
-	trans.eM11 = cos(angle_rad);
-	trans.eM12 = sin(angle_rad);
-	trans.eM21 = -sin(angle_rad);
-	trans.eM22 = cos(angle_rad);
-	trans.eDx = 0.0;
-	trans.eDy = 0.0;
-
-	pDC->ModifyWorldTransform(&trans, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
-}
-
-void CIKOLOKVIJUM2022View::Translate(CDC* pDC, float dX, float dY, bool rightMultiply)
-{
-	XFORM trans;
-	trans.eM11 = 1.0;
-	trans.eM12 = 0.0;
-	trans.eM21 = 0.0;
-	trans.eM22 = 1.0;
-	trans.eDx = dX;
-	trans.eDy = dY;
-
-	pDC->ModifyWorldTransform(&trans, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+	CRect srcRect(0, 0, w, h);
+	CRect dstRect(x, y, x + w, y + h);
+	pozadina->Draw(pDC, srcRect, dstRect);
 }
 
 void CIKOLOKVIJUM2022View::OnDraw(CDC* pDC)
@@ -252,27 +225,33 @@ void CIKOLOKVIJUM2022View::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
-	CRect clientRect;
-	GetClientRect(&clientRect);
+	CRect cr;
+	GetClientRect(&cr);
+
 	CDC* pMemDC = new CDC();
 	pMemDC->CreateCompatibleDC(pDC);
+
 	CBitmap bmp;
-	bmp.CreateCompatibleBitmap(pDC, clientRect.Width(), clientRect.Height());
-	pMemDC->SelectObject(&bmp);
+	bmp.CreateCompatibleBitmap(pDC, cr.Width(), cr.Height());
+	CBitmap* pOldbmp = pMemDC->SelectObject(&bmp);
+	pMemDC->FillSolidRect(cr, pDC->GetBkColor());
+
 	int prevMode = pMemDC->SetGraphicsMode(GM_ADVANCED);
 
-	XFORM oldForm;
-	pMemDC->GetWorldTransform(&oldForm);
-	pMemDC->FillSolidRect(clientRect, pDC->GetBkColor());
-	// call functions
+	XFORM xf;
+	pMemDC->GetWorldTransform(&xf);
+	// start
+	
 	DrawBackground(pMemDC);
 	DrawLampShadow(pMemDC);
 	DrawLamp(pMemDC, false);
-	// end of functions
-	pMemDC->SetWorldTransform(&oldForm);
 
-	pDC->BitBlt(0, 0, clientRect.Width(), clientRect.Height(), pMemDC, 0, 0, SRCCOPY);
-	pMemDC->DeleteDC();
+	// end
+	pMemDC->SetWorldTransform(&xf);
+
+	pDC->BitBlt(0, 0, cr.Width(), cr.Height(), pMemDC, 0, 0, SRCCOPY);
+	pMemDC->SelectObject(&pOldbmp);
+	pMemDC->SetGraphicsMode(prevMode);
 	delete pMemDC;
 }
 
@@ -342,37 +321,30 @@ CIKOLOKVIJUM2022Doc* CIKOLOKVIJUM2022View::GetDocument() const // non-debug vers
 
 BOOL CIKOLOKVIJUM2022View::OnEraseBkgnd(CDC* pDC)
 {
+
 	return 1;
 }
 
 void CIKOLOKVIJUM2022View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 
-	switch (nChar) {
-	case '1':
-		arm1Angle -= 5.0;
-		if (arm1Angle < -45.0) arm1Angle = -45.0;
-		break;
-	case '2':
-		arm1Angle += 5.0;
-		if (arm1Angle > 45.0) arm1Angle = 45.0;
-		break;
-	case '3':
-		arm2Angle -= 5.0;
-		if (arm2Angle < -130.0) arm2Angle = -130.0;
-		break;
-	case '4':
-		arm2Angle += 5.0;
-		if (arm2Angle > 130.0) arm2Angle = 130.0;
-		break;
-	case '5':
-		headAngle -= 5.0;
-		if (headAngle < -45.0) headAngle = -45.0;
-		break;
-	case '6':
-		headAngle += 5.0;
-		if (headAngle > 45.0) headAngle = 45.0;
-		break;
+	if (nChar == '1') {
+		arm1Angle -= 10;
+	}
+	else if (nChar == '2') {
+		arm1Angle += 10;
+
+	} else if (nChar == '3') {
+		arm2Angle -= 10;
+	}
+	else if (nChar == '4') {
+		arm2Angle += 10;
+	}
+	else if (nChar == '5') {
+		headAngle -= 10;
+	}
+	else if (nChar == '6') {
+		headAngle += 10;
 	}
 	
 	Invalidate();
