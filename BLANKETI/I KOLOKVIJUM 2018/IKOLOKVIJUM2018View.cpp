@@ -149,11 +149,14 @@ void CIKOLOKVIJUM2018View::DrawBackground(CDC* pDC)
 	CRect cr;
 	GetClientRect(&cr);
 
-	int w = pozadina->Width();
-	int h = pozadina->Height();
-	CRect srcRect(0, 0, w, h);
+	int imgWidth = pozadina->Width();
+	int imgHeight = pozadina->Height();
 
-	CRect destRect(0, 0, cr.Width(), cr.Height());
+	int x = (cr.Width() - imgWidth) / 2;
+	int y = cr.Height() - imgHeight;
+
+	CRect srcRect(0, 0, imgWidth, imgHeight);
+	CRect destRect(x, y, x + imgWidth, y + imgHeight);
 
 	pozadina->Draw(pDC, srcRect, destRect);
 }
