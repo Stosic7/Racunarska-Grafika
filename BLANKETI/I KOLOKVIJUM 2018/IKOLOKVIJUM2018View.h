@@ -1,29 +1,31 @@
 
-// MFCApplication1View.h : interface of the CMFCApplication1View class
+// IKOLOKVIJUM2018View.h : interface of the CIKOLOKVIJUM2018View class
 //
 
 #pragma once
 #include "DImage.h"
 
-class CMFCApplication1View : public CView
+
+class CIKOLOKVIJUM2018View : public CView
 {
 protected: // create from serialization only
-	CMFCApplication1View() noexcept;
-	DECLARE_DYNCREATE(CMFCApplication1View)
-
-// Attributes
-public:
-	CMFCApplication1Doc* GetDocument() const;
+	CIKOLOKVIJUM2018View() noexcept;
+	DECLARE_DYNCREATE(CIKOLOKVIJUM2018View)
+	
+	DImage* bager;
 	DImage* arm1;
 	DImage* arm2;
-	DImage* bager;
 	DImage* pozadina;
 	HENHMETAFILE viljuska;
 
 	float arm1Angle = 0.0;
 	float arm2Angle = 0.0;
 	float forkAngle = 0.0;
-	float excavatorX = 0.0f;
+	float move = 0.0;
+
+// Attributes
+public:
+	CIKOLOKVIJUM2018Doc* GetDocument() const;
 
 // Operations
 public:
@@ -35,11 +37,11 @@ public:
 	void DrawArm2(CDC* pDC);
 	void DrawArm1(CDC* pDC);
 	void DrawBody(CDC* pDC);
+	void DrawImgTransparent(CDC* pDC, DImage* pImage);
+	void DrawBackground(CDC* pDC);
 	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
 	void Rotate(CDC* pDC, float angle, bool rightMultiply);
 	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
-	void DrawImgTransparent(CDC* pDC, DImage* pImage);
-	void DrawBackground(CDC* pDC);
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
@@ -49,7 +51,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CMFCApplication1View();
+	virtual ~CIKOLOKVIJUM2018View();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -62,13 +64,14 @@ protected:
 	afx_msg void OnFilePrintPreview();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
-#ifndef _DEBUG  // debug version in MFCApplication1View.cpp
-inline CMFCApplication1Doc* CMFCApplication1View::GetDocument() const
-   { return reinterpret_cast<CMFCApplication1Doc*>(m_pDocument); }
+#ifndef _DEBUG  // debug version in IKOLOKVIJUM2018View.cpp
+inline CIKOLOKVIJUM2018Doc* CIKOLOKVIJUM2018View::GetDocument() const
+   { return reinterpret_cast<CIKOLOKVIJUM2018Doc*>(m_pDocument); }
 #endif
 
