@@ -1,19 +1,16 @@
 
-// I KOLOKVIJUM 2022View.h : interface of the CIKOLOKVIJUM2022View class
+// IKOLOKVIJUM2022View.h : interface of the CIKOLOKVIJUM2022View class
 //
 
 #pragma once
 #include "DImage.h"
+
 
 class CIKOLOKVIJUM2022View : public CView
 {
 protected: // create from serialization only
 	CIKOLOKVIJUM2022View() noexcept;
 	DECLARE_DYNCREATE(CIKOLOKVIJUM2022View)
-
-// Attributes
-public:
-	CIKOLOKVIJUM2022Doc* GetDocument() const;
 	DImage* base;
 	DImage* arm1;
 	DImage* arm2;
@@ -28,6 +25,10 @@ public:
 	float arm2Angle = 0.0;
 	float headAngle = 0.0;
 
+// Attributes
+public:
+	CIKOLOKVIJUM2022Doc* GetDocument() const;
+
 // Operations
 public:
 
@@ -38,12 +39,12 @@ public:
 	void DrawLampHead(CDC* pDC, bool bIsShadow);
 	void DrawLampArm2(CDC* pDC, bool bIsShadow);
 	void DrawLampArm1(CDC* pDC, bool bIsShadow);
+	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
+	void Rotate(CDC* pDC, float angle, bool rightMultiply);
+	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
 	void DrawLampBase(CDC* pDC, bool bIsShadow);
 	void DrawImgTransparent(CDC* pDC, DImage* pImage);
 	void DrawBackground(CDC* pDC);
-	void Scale(CDC* pDC, float dX, float dY, bool rightMultiply);
-	void Rotate(CDC* pDC, float angle, bool rightMultiply);
-	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
@@ -72,7 +73,7 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
-#ifndef _DEBUG  // debug version in I KOLOKVIJUM 2022View.cpp
+#ifndef _DEBUG  // debug version in IKOLOKVIJUM2022View.cpp
 inline CIKOLOKVIJUM2022Doc* CIKOLOKVIJUM2022View::GetDocument() const
    { return reinterpret_cast<CIKOLOKVIJUM2022Doc*>(m_pDocument); }
 #endif
