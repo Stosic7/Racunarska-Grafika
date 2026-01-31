@@ -1,10 +1,9 @@
 
-// I KOLOKVIJUM 2023View.h : interface of the CIKOLOKVIJUM2023View class
+// IKOLOKVIJUM2023View.h : interface of the CIKOLOKVIJUM2023View class
 //
 
 #pragma once
 #include "DImage.h"
-
 
 class CIKOLOKVIJUM2023View : public CView
 {
@@ -12,9 +11,6 @@ protected: // create from serialization only
 	CIKOLOKVIJUM2023View() noexcept;
 	DECLARE_DYNCREATE(CIKOLOKVIJUM2023View)
 
-// Attributes
-public:
-	CIKOLOKVIJUM2023Doc* GetDocument() const;
 	DImage* glava;
 	DImage* nadkolenica;
 	DImage* nadlaktica;
@@ -25,21 +21,23 @@ public:
 	DImage* telo;
 	DImage* pozadina;
 
-	int nadLakticaAngle = 0;
-	int podlakticaAngle = 0;
-	int sakaAngle = 0;
-	int robotAngle = 0;
+	float nadlakticaAngle = 0.0;
+	float podlakticaAngle = 0.0;
+	float sakaAngle = 0.0;
+	float ceo = 0.0;
 	float robotScale = 1.0;
-	float ceo = 0.0f;
+
+// Attributes
+public:
+	CIKOLOKVIJUM2023Doc* GetDocument() const;
 
 // Operations
 public:
 
 // Overrides
 public:
-	void DrawHead(CDC* pDC);
 	void DrawRobot(CDC* pDC);
-	void Mirror(CDC* pDC, float sX, float sY, bool rightMultiply);
+	void DrawHead(CDC* pDC);
 	void DrawHalf(CDC* pDC);
 	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
 	void Rotate(CDC* pDC, float angle, bool rightMultiply);
@@ -74,7 +72,7 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
-#ifndef _DEBUG  // debug version in I KOLOKVIJUM 2023View.cpp
+#ifndef _DEBUG  // debug version in IKOLOKVIJUM2023View.cpp
 inline CIKOLOKVIJUM2023Doc* CIKOLOKVIJUM2023View::GetDocument() const
    { return reinterpret_cast<CIKOLOKVIJUM2023Doc*>(m_pDocument); }
 #endif
