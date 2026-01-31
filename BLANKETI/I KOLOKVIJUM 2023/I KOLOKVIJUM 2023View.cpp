@@ -1,5 +1,5 @@
 
-// I KOLOKVIJUM 2023View.cpp : implementation of the CIKOLOKVIJUM2023View class
+// IKOLOKVIJUM2023View.cpp : implementation of the CIKOLOKVIJUM2023View class
 //
 
 #include "pch.h"
@@ -7,11 +7,11 @@
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "I KOLOKVIJUM 2023.h"
+#include "IKOLOKVIJUM2023.h"
 #endif
 
-#include "I KOLOKVIJUM 2023Doc.h"
-#include "I KOLOKVIJUM 2023View.h"
+#include "IKOLOKVIJUM2023Doc.h"
+#include "IKOLOKVIJUM2023View.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,7 +37,6 @@ END_MESSAGE_MAP()
 
 CIKOLOKVIJUM2023View::CIKOLOKVIJUM2023View() noexcept
 {
-	// TODO: add construction code here
 	glava = new DImage();
 	nadkolenica = new DImage();
 	nadlaktica = new DImage();
@@ -57,6 +56,7 @@ CIKOLOKVIJUM2023View::CIKOLOKVIJUM2023View() noexcept
 	stopalo->Load(CString("slike/stopalo.png"));
 	telo->Load(CString("slike/telo.png"));
 	pozadina->Load(CString("slike/pozadina.jpg"));
+
 }
 
 CIKOLOKVIJUM2023View::~CIKOLOKVIJUM2023View()
@@ -82,20 +82,22 @@ BOOL CIKOLOKVIJUM2023View::PreCreateWindow(CREATESTRUCT& cs)
 
 // CIKOLOKVIJUM2023View drawing
 
-void CIKOLOKVIJUM2023View::Translate(CDC* pDC, float dX, float dY, bool rightMultiply)
+void CIKOLOKVIJUM2023View::DrawRobot(CDC* pDC)
 {
-	XFORM xform = { 1, 0, 0, 1, dX, dY };
-	pDC->ModifyWorldTransform(&xform, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
-}
+	XFORM oldForm;
+	pDC->GetWorldTransform(&oldForm);
 
-void CIKOLOKVIJUM2023View::Rotate(CDC* pDC, float angle, bool rightMultiply)
-{
-	float rad = angle * 3.14159265f / 180.0f;
-	float cosA = cos(rad);
-	float sinA = sin(rad);
+	DrawHalf(pDC);
+	Translate(pDC, 500, 160, false);
+	Scale(pDC, -1, 1, false);
+	Translate(pDC, -510, -160, false);
+	DrawHalf(pDC);
 
-	XFORM xform = { cosA, sinA, -sinA, cosA, 0, 0 };
-	pDC->ModifyWorldTransform(&xform, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+	pDC->SetWorldTransform(&oldForm);
+
+	DrawHead(pDC);
+
+	pDC->SetWorldTransform(&oldForm);
 }
 
 void CIKOLOKVIJUM2023View::DrawHead(CDC* pDC)
@@ -103,48 +105,22 @@ void CIKOLOKVIJUM2023View::DrawHead(CDC* pDC)
 	XFORM oldForm;
 	pDC->GetWorldTransform(&oldForm);
 
-	Translate(pDC, ((pozadina->Width() / 2) / 2) + 116, ((pozadina->Height() / 2) / 2) - 220, false);
+	Translate(pDC, 457, 58, false);
 	DrawImgTransparent(pDC, glava);
-	Translate(pDC, -(((pozadina->Width() / 2) / 2) + 75), -(((pozadina->Height() / 2) / 2) - 150), false);
 
 	pDC->SetWorldTransform(&oldForm);
-}
-
-void CIKOLOKVIJUM2023View::DrawRobot(CDC* pDC)
-{
-	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
-
-	float centerX = ((pozadina->Width() / 2) / 2) + 60;
-
-	DrawHalf(pDC);
-
-	Translate(pDC, centerX + 210, 0, false);
-	Mirror(pDC, -1, 1, false);
-	Translate(pDC, -centerX, 0, false); 
-
-	DrawHalf(pDC);
-	DrawHead(pDC);
-
-	pDC->SetWorldTransform(&oldForm);
-}
-
-void CIKOLOKVIJUM2023View::Mirror(CDC* pDC, float sX, float sY, bool rightMultiply)
-{
-	XFORM xform = { sX, 0, 0, sY, 0, 0 };
-	pDC->ModifyWorldTransform(&xform, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 
 void CIKOLOKVIJUM2023View::DrawHalf(CDC* pDC)
 {
 	XFORM oldForm;
-	pDC->GetWorldTransform(&oldForm);
+	pDC->GetWorldTransform(&oldForm); // 0,0
 
-	Translate(pDC, ((pozadina->Width() / 2) / 2) + 60, ((pozadina->Height() / 2) / 2) - 120, false); // telo krece od centra slike
+	Translate(pDC, 400, 160, false); // vracamo se posle opet ovde kad crtamo noge
 	DrawImgTransparent(pDC, telo);
 
 	Translate(pDC, 25, 65, false);
-	Rotate(pDC, nadLakticaAngle, false);
+	Rotate(pDC, nadlakticaAngle, false);
 	Translate(pDC, -35, -35, false);
 	DrawImgTransparent(pDC, nadlaktica);
 
@@ -155,16 +131,16 @@ void CIKOLOKVIJUM2023View::DrawHalf(CDC* pDC)
 
 	Translate(pDC, 30, 140, false);
 	Rotate(pDC, sakaAngle, false);
-	Translate(pDC, -25, 3, false);
+	Translate(pDC, -25, -3, false);
 	DrawImgTransparent(pDC, saka);
 
 	pDC->SetWorldTransform(&oldForm);
-	Translate(pDC, ((pozadina->Width() / 2) / 2) + 60, ((pozadina->Height() / 2) / 2) - 120, false);
+	Translate(pDC, 400, 160, false);
 
 	Translate(pDC, 61, 262, false);
-	Translate(pDC, -29, 20, false);
+	Translate(pDC, -29, -20, false);
 	DrawImgTransparent(pDC, nadkolenica);
-
+	
 	Translate(pDC, 30, 184, false);
 	Translate(pDC, -25, -37, false);
 	DrawImgTransparent(pDC, podkolenica);
@@ -176,34 +152,43 @@ void CIKOLOKVIJUM2023View::DrawHalf(CDC* pDC)
 	pDC->SetWorldTransform(&oldForm);
 }
 
-
 void CIKOLOKVIJUM2023View::Scale(CDC* pDC, float sX, float sY, bool rightMultiply)
 {
-	XFORM xform = { sX, 0, 0, sY, 0, 0 };
-	pDC->ModifyWorldTransform(&xform, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+	XFORM xf = { sX, 0, 0, sY, 0, 0 };
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+void CIKOLOKVIJUM2023View::Rotate(CDC* pDC, float angle, bool rightMultiply)
+{
+	float rad = angle * (3.14 / 180.0f);
+	XFORM xf = { cos(rad), sin(rad), -sin(rad), cos(rad), 0, 0};
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+void CIKOLOKVIJUM2023View::Translate(CDC* pDC, float dX, float dY, bool rightMultiply)
+{
+	XFORM xf = { 1, 0, 0, 1, dX, dY };
+	pDC->ModifyWorldTransform(&xf, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 
 void CIKOLOKVIJUM2023View::DrawImgTransparent(CDC* pDC, DImage* pImage)
 {
-	BYTE* buffer = pImage->GetDIBBits();
-	COLORREF transparentColor = RGB(buffer[2], buffer[1], buffer[0]);
+	BYTE* bytes = pImage->GetDIBBits();
+	COLORREF color = RGB(bytes[2], bytes[1], bytes[0]);
+	int w = pImage->Width();
+	int h = pImage->Height();
+	CRect cr(0, 0, w, h);
 
-	CRect rc(0, 0, pImage->Width(), pImage->Height());
-	pImage->DrawTransparent(pDC, rc, rc, transparentColor);
+	pImage->DrawTransparent(pDC, cr, cr, color);
 }
 
 void CIKOLOKVIJUM2023View::DrawBackground(CDC* pDC)
 {
-	int bgWidth = pozadina->Width();
-	int bgHeight = pozadina->Height();
+	int w = pozadina->Width();
+	int h = pozadina->Height();
+	CRect rect(0, 0, w, h);
 
-	CRect clientRect;
-	GetClientRect(&clientRect);
-
-	CRect srcRect(0, 0, bgWidth, bgHeight);
-	CRect dstRect(0, 0, (clientRect.Width()), (clientRect.Height()));
-
-	pozadina->Draw(pDC, srcRect, dstRect);
+	pozadina->Draw(pDC, rect, rect);
 }
 
 void CIKOLOKVIJUM2023View::OnDraw(CDC* pDC)
@@ -213,34 +198,33 @@ void CIKOLOKVIJUM2023View::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
-	CRect clientRect;
-	GetClientRect(&clientRect);
+	CRect cr;
+	GetClientRect(&cr);
 
 	CDC* pMemDC = new CDC();
 	pMemDC->CreateCompatibleDC(pDC);
 
-	CBitmap memBitmap;
-	memBitmap.CreateCompatibleBitmap(pDC, clientRect.Width(), clientRect.Height());
+	CBitmap bmp;
+	bmp.CreateCompatibleBitmap(pDC, cr.Width(), cr.Height());
+	CBitmap* pOldBmp = pMemDC->SelectObject(&bmp);
+	pMemDC->FillSolidRect(cr, pDC->GetBkColor());
 
-	CBitmap* oldBitmap = pMemDC->SelectObject(&memBitmap);
-	int oldMode = pMemDC->SetGraphicsMode(GM_ADVANCED);
-
-	XFORM oldForm;
-	pMemDC->GetWorldTransform(&oldForm);
-	// start
-	
+	int prevMode = pMemDC->SetGraphicsMode(GM_ADVANCED);
+	XFORM xf;
+	pMemDC->GetWorldTransform(&xf);
+	//start
 	DrawBackground(pMemDC);
+	Translate(pMemDC, 520, 470, false);
 	Rotate(pMemDC, ceo, false);
 	Scale(pMemDC, robotScale, robotScale, false);
+	Translate(pMemDC, -520, -470, false);
 	DrawRobot(pMemDC);
-
 	//end
-	pMemDC->SetWorldTransform(&oldForm);
+	pMemDC->SetWorldTransform(&xf);
 
-	pDC->BitBlt(0, 0, clientRect.Width(), clientRect.Height(), pMemDC, 0, 0, SRCCOPY);
-	pMemDC->SelectObject(&oldBitmap);
-	pMemDC->SetGraphicsMode(oldMode);
-
+	pDC->BitBlt(0, 0, cr.Width(), cr.Height(), pMemDC, 0, 0, SRCCOPY);
+	pMemDC->SelectObject(&pOldBmp);
+	pMemDC->SetGraphicsMode(prevMode);
 	delete pMemDC;
 }
 
@@ -310,49 +294,43 @@ CIKOLOKVIJUM2023Doc* CIKOLOKVIJUM2023View::GetDocument() const // non-debug vers
 
 BOOL CIKOLOKVIJUM2023View::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: Add your message handler code here and/or call default
-
 	return 1;
 }
 
 void CIKOLOKVIJUM2023View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	if ((nChar == 'A' || nChar == 'a') && sakaAngle >= 0)
-	{
-		sakaAngle -= 5;
+	if (nChar == 'A') {
+		sakaAngle -= 10.0;
+		if (sakaAngle < -10.0) sakaAngle = -10.0;
 	}
-	else if ((nChar == 'S' || nChar == 's') && sakaAngle <= 20)
-	{
-		sakaAngle += 5;
+	else if (nChar == 'S') {
+		sakaAngle += 10.0;
+		if (sakaAngle > 30.0) sakaAngle = 30.0;
 	}
-	else if ((nChar == 'D' || nChar == 'd') && podlakticaAngle >= 0)
-	{
-		podlakticaAngle -= 5;
+	else if (nChar == 'D') {
+		podlakticaAngle -= 10.0;
+		if (podlakticaAngle < -10.0) podlakticaAngle = -10.0;
 	}
-	else if ((nChar == 'F' || nChar == 'f') && podlakticaAngle <= 70)
-	{
-		podlakticaAngle += 5;
+	else if (nChar == 'F') {
+		podlakticaAngle += 10.0;
+		if (podlakticaAngle > 80.0) podlakticaAngle = 80.0;
 	}
-	else if ((nChar == 'G' || nChar == 'g') && nadLakticaAngle >= 0)
-	{
-		nadLakticaAngle -= 5;
+	else if (nChar == 'G') {
+		nadlakticaAngle -= 10.0;
+		if (nadlakticaAngle < -10.0) nadlakticaAngle = -10.0;
 	}
-	else if ((nChar == 'H' || nChar == 'h') && nadLakticaAngle <= 80)
-	{
-		nadLakticaAngle += 5;
+	else if (nChar == 'H') {
+		nadlakticaAngle += 10.0;
+		if (nadlakticaAngle > 90.0) nadlakticaAngle = 90.0;
 	}
-
-	if (nChar == '1')
-		robotScale += 0.1;
-	else if (nChar == '2')
+	else if (nChar == '1') {
+		ceo -= 5.0f;
 		robotScale -= 0.1;
-
-
-	if (nChar == '3')
-		ceo += 5;
-	else if (nChar == '4')
-		ceo -= 5;
-
+	}
+	else if (nChar == '2') {
+		ceo += 5.0f;
+		robotScale += 0.1;
+	}
 
 	Invalidate();
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
