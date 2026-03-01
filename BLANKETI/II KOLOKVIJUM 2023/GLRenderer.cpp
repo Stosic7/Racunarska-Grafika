@@ -10,10 +10,6 @@ CGLRenderer::CGLRenderer(void)
 {
 	m_hrc = NULL;
 
-	m_rot1 = 20.0;
-	m_rot2 = -60.0;
-	m_rot3 = -80.0;
-
 	UpdateCameraPosition();
 }
 
@@ -58,36 +54,40 @@ void CGLRenderer::PrepareScene(CDC *pDC)
 	glEnable(GL_CULL_FACE);
 
 	lamp = LoadTexture("slike/lamp.jpg");
-
-	pozadina[0] = LoadTexture("slike/back.jpg");
-	pozadina[1] = LoadTexture("slike/bot.jpg");
-	pozadina[2] = LoadTexture("slike/front.jpg");
-	pozadina[3] = LoadTexture("slike/left.jpg");
-	pozadina[4] = LoadTexture("slike/right.jpg");
-	pozadina[5] = LoadTexture("slike/side.jpg");
-	pozadina[6] = LoadTexture("slike/top.jpg");
+	pozadina[0] = LoadTexture("slike/front.jpg");
+	pozadina[1] = LoadTexture("slike/left.jpg");
+	pozadina[2] = LoadTexture("slike/right.jpg");
+	pozadina[3] = LoadTexture("slike/back.jpg");
+	pozadina[4] = LoadTexture("slike/top.jpg");
+	pozadina[5] = LoadTexture("slike/bot.jpg");
+	pozadina[6] = LoadTexture("slike/side.jpg");
 
 	glEnable(GL_TEXTURE_2D);
 	//---------------------------------
 	wglMakeCurrent(NULL, NULL);
 }
 
-void CGLRenderer::DrawScene(CDC* pDC)
+void CGLRenderer::DrawScene(CDC *pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//---------------------------------
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
-	UpdateCameraPosition();
 
 	gluLookAt(
-		m_eyex, m_eyey, m_eyez,
+		eyex, eyey, eyez,
 		0.0, 4.0, 0.0,
 		0.0, 1.0, 0.0
 	);
 
+	glPushMatrix();
+	{
+		glTranslatef(0, 50, 0);
+		DrawEnvCube(100.0);
+	}
+	glPopMatrix();
+
 	DrawAxes();
-	// ovde crtamo pozadinski cube
 	glPushMatrix();
 	{
 		glTranslatef(0.0, 50.0, 0.0);
@@ -95,7 +95,6 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	}
 	glPopMatrix();
 
-	// ovde crtamo lampu
 	DrawLamp();
 
 	glFlush();
@@ -132,63 +131,67 @@ void CGLRenderer::DestroyScene(CDC *pDC)
 
 void CGLRenderer::RotateView(double dXY, double dXZ)
 {
-	m_angleXY += dXY;
-	m_angleXZ += dXZ;
+	XY += dXY;
+	XZ += dXZ;
 
-	if (m_angleXZ > 90)
-		m_angleXZ = 90;
-	if (m_angleXY < -90)
-		m_angleXY = -90;
+	if (XZ > 90)
+		XZ = 90;
+	if (XY < -90)
+		XY = -90;
 
 	UpdateCameraPosition();
 }
 
 void CGLRenderer::ZoomView(double dR)
 {
-	m_cameraR += dR;
+	R += dR;
 
-	if (m_cameraR < 2)
-		m_cameraR = 2;
-	if (m_cameraR > 80)
-		m_cameraR = 80;
+	if (R < 2)
+		R = 2;
+	if (R > 50)
+		R = 50;
 
 	UpdateCameraPosition();
 }
 
 void CGLRenderer::UpdateCameraPosition()
 {
-	double radXY = ToRad(m_angleXY);
-	double radXZ = ToRad(m_angleXZ);
+	double rXY = ToRad(XY);
+	double rXZ = ToRad(XZ);
 
-	m_eyex = m_cameraR * cos(radXZ) * cos(radXY);
-	m_eyey = m_cameraR * sin(radXZ);
-	m_eyez = m_cameraR * cos(radXZ) * sin(radXY);
+	eyex = R * cos(rXZ) * cos(rXY);
+	eyey = R * sin(rXZ);
+	eyez = R * cos(rXZ) * sin(rXY);
 }
 
 void CGLRenderer::DrawAxes()
 {
+	glDisable(GL_CULL_FACE);
 	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
 	glLineWidth(2.0);
 	glBegin(GL_LINES);
 	{
 		// x osa
-		glColor3f(0.0, 0.0, 1.0);
+		glColor3f(0, 0, 1);
 		glVertex3d(0, 0, 0);
 		glVertex3d(50, 0, 0);
 
 		// y osa
-		glColor3f(1.0, 0.0, 0.0);
+		glColor3f(1, 0, 0);
 		glVertex3d(0, 0, 0);
 		glVertex3d(0, 50, 0);
 
 		// z osa
-		glColor3f(0.0, 1.0, 0.0);
+		glColor3f(0, 1, 0);
 		glVertex3d(0, 0, 0);
 		glVertex3d(0, 0, 50);
 	}
 	glEnd();
 	glLineWidth(1.0);
+	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_CULL_FACE);
 }
 
 UINT CGLRenderer::LoadTexture(char* fileName)
@@ -217,126 +220,87 @@ void CGLRenderer::DrawEnvCube(double a)
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 
-	// front
-	glBindTexture(GL_TEXTURE_2D, pozadina[2]);
+	//front
+	glBindTexture(GL_TEXTURE_2D, pozadina[0]);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(1.0, 1.0, 1.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3d(-a / 2, a / 2, -a / 2);
+		glColor3f(1, 1, 1);
 
-		glTexCoord2f(0.0, 0.0);
-		glVertex3d(-a / 2, -a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 0.0);
-		glVertex3d(a / 2, -a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 1.0);
-		glVertex3d(a / 2, a / 2, -a / 2);
-
+		glTexCoord2f(0, 0); glVertex3d(-a / 2, a / 2, -a / 2);
+		glTexCoord2f(0, 1); glVertex3d(-a / 2, -a / 2, -a / 2);
+		glTexCoord2f(1, 1); glVertex3d(a / 2, -a / 2, -a / 2);
+		glTexCoord2f(1, 0); glVertex3d(a / 2, a / 2, -a / 2);
 	}
 	glEnd();
 
 	// left
+	glBindTexture(GL_TEXTURE_2D, pozadina[1]);
+	glBegin(GL_QUADS);
+	{
+		glColor3f(1, 1, 1);
+
+		glTexCoord2f(0, 0); glVertex3d(-a / 2, a / 2, a / 2);
+		glTexCoord2f(0, 1); glVertex3d(-a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 1); glVertex3d(-a / 2, -a / 2, -a / 2);
+		glTexCoord2f(1, 0); glVertex3d(-a / 2, a / 2, -a / 2);
+	}
+	glEnd();
+
+	//right
+	glBindTexture(GL_TEXTURE_2D, pozadina[2]);
+	glBegin(GL_QUADS);
+	{
+		glColor3f(1, 1, 1);
+
+		glTexCoord2f(0, 0); glVertex3d(a / 2, a / 2, -a / 2);
+		glTexCoord2f(0, 1); glVertex3d(a / 2, -a / 2, -a / 2);
+		glTexCoord2f(1, 1); glVertex3d(a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 0); glVertex3d(a / 2, a / 2, a / 2);
+	}
+	glEnd();
+
+	//back
 	glBindTexture(GL_TEXTURE_2D, pozadina[3]);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(1.0, 1.0, 1.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3d(-a / 2, a / 2, a / 2);
+		glColor3f(1, 1, 1);
 
-		glTexCoord2f(0.0, 0.0);
-		glVertex3d(-a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 0.0);
-		glVertex3d(-a / 2, -a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 1.0);
-		glVertex3d(-a / 2, a / 2, -a / 2);
-
+		glTexCoord2f(0, 0); glVertex3d(a / 2, a / 2, a / 2);
+		glTexCoord2f(0, 1); glVertex3d(a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 1); glVertex3d(-a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 0); glVertex3d(-a / 2, a / 2, a / 2);
 	}
 	glEnd();
 
-	// right
+	//top
 	glBindTexture(GL_TEXTURE_2D, pozadina[4]);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(1.0, 1.0, 1.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3d(a / 2, a / 2, -a / 2);
+		glColor3f(1, 1, 1);
 
-		glTexCoord2f(0.0, 0.0);
-		glVertex3d(a / 2, -a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 0.0);
-		glVertex3d(a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 1.0);
-		glVertex3d(a / 2, a / 2, a / 2);
-
-	}
-	glEnd();
-
-	// back 
-	glBindTexture(GL_TEXTURE_2D, pozadina[0]);
-	glBegin(GL_QUADS);
-	{
-		glColor3f(1.0, 1.0, 1.0);
-
-		glTexCoord2f(0.0, 1.0); 
-		glVertex3d(a / 2, a / 2, a / 2);
-
-		glTexCoord2f(0.0, 0.0); 
-		glVertex3d(a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 0.0); 
-		glVertex3d(-a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 1.0); 
-		glVertex3d(-a / 2, a / 2, a / 2);
+		glTexCoord2f(0, 0); glVertex3d(-a / 2, a / 2, a / 2);
+		glTexCoord2f(0, 1); glVertex3d(-a / 2, a / 2, -a / 2);
+		glTexCoord2f(1, 1); glVertex3d(a / 2, a / 2, -a / 2);
+		glTexCoord2f(1, 0); glVertex3d(a / 2, a / 2, a / 2);
 	}
 	glEnd();
 
 	// top
-	glBindTexture(GL_TEXTURE_2D, pozadina[6]);
+	glBindTexture(GL_TEXTURE_2D, pozadina[5]);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(1.0, 1.0, 1.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3d(-a / 2, a / 2, a / 2);
+		glColor3f(1, 1, 1);
 
-		glTexCoord2f(0.0, 0.0);
-		glVertex3d(-a / 2, a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 0.0);
-		glVertex3d(a / 2, a / 2, -a / 2);
-
-		glTexCoord2f(1.0, 1.0);
-		glVertex3d(a / 2, a / 2, a / 2);
-	}
-	glEnd();
-
-	// bottom
-	glBindTexture(GL_TEXTURE_2D, pozadina[1]);
-	glBegin(GL_QUADS);
-	{
-		glColor3f(1.0, 1.0, 1.0);
-		glTexCoord2f(0.0, 1.0);
-		glVertex3d(-a / 2, -a / 2, -a / 2);
-
-		glTexCoord2f(0.0, 0.0);
-		glVertex3d(-a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 0.0);
-		glVertex3d(a / 2, -a / 2, a / 2);
-
-		glTexCoord2f(1.0, 1.0);
-		glVertex3d(a / 2, -a / 2, -a / 2);
+		glTexCoord2f(0, 0); glVertex3d(-a / 2, -a / 2, -a / 2);
+		glTexCoord2f(0, 1); glVertex3d(-a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 1); glVertex3d(a / 2, -a / 2, a / 2);
+		glTexCoord2f(1, 0); glVertex3d(a / 2, -a / 2, -a / 2);
 	}
 	glEnd();
 
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_LIGHTING);
+	glDisable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
 }
 
 void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int texMode, bool bIsOpen)
@@ -345,19 +309,22 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 
-	double ang = 360.0 / nSeg;
+	double step = 360.0 / nSeg;
+
 	if (texMode == 0) {
 		glPushMatrix();
 		{
+			glColor3f(1.0, 1.0, 1.0);
 			glBindTexture(GL_TEXTURE_2D, lamp);
+
 			if (bIsOpen == false) {
 				// donja osnova
 				glBegin(GL_TRIANGLE_FAN);
 				{
 					glTexCoord2f(0.5, 0.25);
 					glVertex3d(0, 0, 0);
-					for (double angle = 0; angle <= 360; angle += ang) {
-						double rad = ToRad(angle);
+					for (int i = 0; i <= 360; i += step) {
+						double rad = ToRad(i);
 						glTexCoord2f(0.5 + 0.5 * cos(rad), 0.25 + 0.25 * sin(rad));
 						glVertex3d(r1 * cos(rad), 0, r1 * sin(rad));
 					}
@@ -369,8 +336,8 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 				{
 					glTexCoord2f(0.5, 0.25);
 					glVertex3d(0, h, 0);
-					for (double angle = 0; angle <= 360; angle += ang) {
-						double rad = ToRad(angle);
+					for (int i = 0; i <= 360; i += step) {
+						double rad = ToRad(i);
 						glTexCoord2f(0.5 + 0.5 * cos(rad), 0.25 + 0.25 * sin(rad));
 						glVertex3d(r2 * cos(rad), h, r2 * sin(rad));
 					}
@@ -381,9 +348,9 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 			// omotac
 			glBegin(GL_QUAD_STRIP);
 			{
-				for (double angle = 0; angle <= 360; angle += ang) {
-					double rad = ToRad(angle);
-					double u = angle / 360.0;
+				for (int i = 0; i <= 360; i += step) {
+					double rad = ToRad(i);
+					double u = i / 360.0;
 
 					glTexCoord2f(u, 0.0);
 					glVertex3d(r2 * cos(rad), h, r2 * sin(rad));
@@ -399,15 +366,17 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 	else if (texMode == 1) {
 		glPushMatrix();
 		{
+			glColor3f(1.0, 1.0, 1.0);
 			glBindTexture(GL_TEXTURE_2D, lamp);
+
 			if (bIsOpen == false) {
 				// donja osnova
 				glBegin(GL_TRIANGLE_FAN);
 				{
 					glTexCoord2f(0.5, 0.25);
 					glVertex3d(0, 0, 0);
-					for (double angle = 0; angle <= 360; angle += ang) {
-						double rad = ToRad(angle);
+					for (int i = 0; i <= 360; i += step) {
+						double rad = ToRad(i);
 						glTexCoord2f(0.5 + 0.5 * cos(rad), 0.25 + 0.25 * sin(rad));
 						glVertex3d(r1 * cos(rad), 0, r1 * sin(rad));
 					}
@@ -419,8 +388,8 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 				{
 					glTexCoord2f(0.5, 0.25);
 					glVertex3d(0, h, 0);
-					for (double angle = 0; angle <= 360; angle += ang) {
-						double rad = ToRad(angle);
+					for (int i = 0; i <= 360; i += step) {
+						double rad = ToRad(i);
 						glTexCoord2f(0.5 + 0.5 * cos(rad), 0.25 + 0.25 * sin(rad));
 						glVertex3d(r2 * cos(rad), h, r2 * sin(rad));
 					}
@@ -431,9 +400,9 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 			// omotac
 			glBegin(GL_QUAD_STRIP);
 			{
-				for (double angle = 0; angle <= 360; angle += ang) {
-					double rad = ToRad(angle);
-					double u = angle / 360.0;
+				for (int i = 0; i <= 360; i += step) {
+					double rad = ToRad(i);
+					double u = i / 360.0;
 
 					glTexCoord2f(u, 0.5);
 					glVertex3d(r2 * cos(rad), h, r2 * sin(rad));
@@ -446,7 +415,7 @@ void CGLRenderer::DrawCylinder(double r1, double r2, double h, int nSeg, int tex
 		}
 		glPopMatrix();
 	}
-	
+
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_LIGHTING);
 }
@@ -551,3 +520,5 @@ void CGLRenderer::DrawLamp()
 	}
 	glPopMatrix();
 }
+
+
